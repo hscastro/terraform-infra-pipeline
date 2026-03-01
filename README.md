@@ -1,0 +1,1 @@
+PIPELINE com Terraform, Github Actions e AWS
