@@ -23,7 +23,6 @@ jobs:
   terraform:
     runs-on: ubuntu-latest
 
-    # ESSENCIAL para OIDC funcionar em reusable workflow
     permissions:
       id-token: write
       contents: read
