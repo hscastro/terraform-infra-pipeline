@@ -55,30 +55,27 @@ jobs:
 
 
       - name: Terraform Init
-        working-directory: infra
         run: |
-          terraform init \
+          cd infra && terraform init \
             -backend-config="bucket=${{ inputs.aws-statefile-s3-bucket }}" \
             -backend-config="key=${{ github.event.repository.name }}/${{ inputs.environment }}.tfstate" \
             -backend-config="region=${{ inputs.aws-region }}" \
             -backend-config="dynamodb_table=${{ inputs.aws-lock-dynamodb-table }}"
 
       - name: Terraform Validate
-        working-directory: infra
         run: terraform validate
 
       - name: Terraform Destroy 
         if: steps.read-destroy-config.outputs.destroy == 'true'
         id: terraform-destroy
         run: cd infra &&
-          terraform workspace select ${{ inputs.environment }} || terraform workspace new ${{ inputs.environment }}
+          terraform workspace select ${{ inputs.environment }} || terraform workspace new ${{ inputs.environment }} &&
           terraform destroy -var-file="./envs/${{ inputs.environment }}/terraform.tfvars" -auto-approve  
 
       - name: Terraform Plan
         if: steps.read-destroy-config.outputs.destroy != 'true'
         id: terraform-plan
-        working-directory: infra
-        run: |
+        run: cd infra &&
           terraform workspace select ${{ inputs.environment }} || terraform workspace new ${{ inputs.environment }}
           terraform plan \
             -var-file="./envs/${{ inputs.environment }}/terraform.tfvars" \
@@ -87,7 +84,6 @@ jobs:
       - name: Terraform Apply
         if: steps.read-destroy-config.outputs.destroy != 'true'
         id: terraform-apply
-        working-directory: infra
-        run: |
+        run: cd infra &&
           terraform workspace select ${{ inputs.environment }} || terraform workspace new ${{ inputs.environment }}
           terraform apply -auto-approve "${{ inputs.environment }}.plan"
